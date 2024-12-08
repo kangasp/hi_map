@@ -12,41 +12,21 @@ G_URL = "https://raw.githubusercontent.com/kangasp/hi_map/main/sw/"
 V_URL = G_URL + "version.json"
 
 
+# TODO:  Get this grid programatically based on GPS coords
 KR_URL = "https://api.weather.gov/gridpoints/HFO/240,91/forecast"
 
 
 
+# headers = {'User-Agent': "hi_map",
+#         'accept': "application/geo+json",
+#         'Cache-Control': 'no-cache'}
+# 
+# response = urequests.get("https://api.weather.gov", headers=headers)
+# response = urequests.get("https://api.weather.gov/gridpoints/HFO/240,91/forecast", headers=headers)
+# data = json.loads(response.text)
+# data['properties']['periods'][0]['name']
+# data['properties']['periods'][0]['detailedForecast']
 
-
-
-headers = {'User-Agent': "hi_map",
-        'accept': "application/geo+json",
-        'Cache-Control': 'no-cache'}
-
-
-response = urequests.get("https://api.weather.gov", headers=headers)
-
-
-
-response = urequests.get("https://api.weather.gov")
-
-response = urequests.get("https://api.weather.gov/gridpoints/HFO/240,91/forecast", headers=headers)
-data = json.loads(response.text)
-data['properties']['periods'][0]['name']
-data['properties']['periods'][0]['detailedForecast']
-
-
-KOHALA_RANCH = 20.108220961243283, -155.81866349994993
-https://api.weather.gov/points/20.108220961243283,-155.81866349994993
-
-
-https://api.weather.gov/points/20.11,-155.81
-lat=20.11&lon=-155.81
-
-https://api.weather.gov/gridpoints/HFO/240,91/forecast
-
-
-lat=20.11&lon=-155.83
 
 
 def connect_wifi(ssid, password)->bool:
