@@ -1,5 +1,5 @@
 {
     "version": 0,
     "date": "12-7-2024",
-    "files": ["main.py", "ota.py"]
+    "files": ["version.json", "main.py", "ota.py"]
 }
