@@ -15,9 +15,9 @@ def latest_version_info(version_url):
     data = json.loads(response.text)
     return data
 
-def save_from_url(file_name):
+def save_from_url(file_name, url):
     ret = False
-    file_url = URL + file_name
+    file_url = url + file_name
     response = urequests.get(file_url)
     if response.status_code == 200:
         print(f'Fetched latest firmware code, status: {response.status_code}')
@@ -28,10 +28,10 @@ def save_from_url(file_name):
         print(f'Firmware download error found - {file_url}, {response.status_code}.')
     return ret
 
-def update_files(files):
+def update_files(files, url):
     ret = True
     for f in files:
-        if not save_from_url(f):
+        if not save_from_url(f, url):
             print(f"FAILED update on file: {f}")
             ret = False
             break
