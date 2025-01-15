@@ -85,7 +85,7 @@ class EPD:
         self.busy = busy
         self.cs.init(self.cs.OUT, value=1)
         self.dc.init(self.dc.OUT, value=0)
-        self.rst.init(self.rst.OUT, value=1)
+        self.rst.init(self.rst.OUT, value=0)
         self.busy.init(self.busy.IN)
         self.width = EPD_WIDTH
         self.height = EPD_HEIGHT
@@ -119,13 +119,22 @@ class EPD:
         while self.busy.value() == BUSY:
             sleep_ms(100)
     def reset(self):
+        '''
+        digitalWrite(_rst, HIGH); // NEEDED for Waveshare "clever" reset circuit, power controller before reset pulse, preset (less glitch for any analyzer)
+        pinMode(_rst, OUTPUT);
+        digitalWrite(_rst, HIGH); // NEEDED for Waveshare "clever" reset circuit, power controller before reset pulse, set (needed e.g. for RP2040)
+        delay(10); // NEEDED for Waveshare "clever" reset circuit, at least delay(2);
+        digitalWrite(_rst, LOW);
+        delay(_reset_duration);
+        digitalWrite(_rst, HIGH);
+        delay(_reset_duration > 10 ? _reset_duration : 10);
+        '''
         self.rst(1)
-        sleep_ms(2)
+        sleep_ms(100)
         self.rst(0)
-        # sleep_ms(200)
         sleep_ms(2)
         self.rst(1)
-        sleep_ms(200)
+        sleep_ms(100)
     def set_lut(self):
         self._command(LUT_FOR_VCOM, self.LUT_VCOM0)    # vcom
         self._command(LUT_WHITE_TO_WHITE, self.LUT_WW) # ww --
