@@ -85,18 +85,16 @@ class EPD:
         self.busy = busy
         self.cs.init(self.cs.OUT, value=1)
         self.dc.init(self.dc.OUT, value=0)
-        self.rst.init(self.rst.OUT, value=0)
+        self.rst.init(self.rst.OUT, value=1)
         self.busy.init(self.busy.IN)
         self.width = EPD_WIDTH
         self.height = EPD_HEIGHT
-
     # 44/42 bytes (look up tables)
     LUT_VCOM0 = bytearray(b'\x00\x17\x00\x00\x00\x02\x00\x17\x17\x00\x00\x02\x00\x0A\x01\x00\x00\x01\x00\x0E\x0E\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
     LUT_WW    = bytearray(b'\x40\x17\x00\x00\x00\x02\x90\x17\x17\x00\x00\x02\x40\x0A\x01\x00\x00\x01\xA0\x0E\x0E\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
     LUT_BW    = LUT_WW
     LUT_BB    = bytearray(b'\x80\x17\x00\x00\x00\x02\x90\x17\x17\x00\x00\x02\x80\x0A\x01\x00\x00\x01\x50\x0E\x0E\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
     LUT_WB    = LUT_BB
-
     def _command(self, command, data=None):
         self.dc(0)
         self.cs(0)
@@ -104,13 +102,11 @@ class EPD:
         self.cs(1)
         if data is not None:
             self._data(data)
-
     def _data(self, data):
         self.dc(1)
         self.cs(0)
         self.spi.write(data)
         self.cs(1)
-
     def init(self):
         self.reset()
         self._command(POWER_SETTING, b'\x03\x00\x2B\x2B\xFF') # VDS_EN VDG_EN, VCOM_HV VGHL_LV[1] VGHL_LV[0], VDH, VDL, VDHR
@@ -119,24 +115,23 @@ class EPD:
         self.wait_until_idle()
         self._command(PANEL_SETTING, b'\xBF\x0B') # KW-BF   KWR-AF  BWROTP 0f
         self._command(PLL_CONTROL, b'\x3C') # 3A 100HZ   29 150Hz 39 200HZ  31 171HZ
-
     def wait_until_idle(self):
         while self.busy.value() == BUSY:
             sleep_ms(100)
-
     def reset(self):
+        self.rst(1)
+        sleep_ms(2)
         self.rst(0)
-        sleep_ms(200)
+        # sleep_ms(200)
+        sleep_ms(2)
         self.rst(1)
         sleep_ms(200)
-
     def set_lut(self):
         self._command(LUT_FOR_VCOM, self.LUT_VCOM0)    # vcom
         self._command(LUT_WHITE_TO_WHITE, self.LUT_WW) # ww --
         self._command(LUT_BLACK_TO_WHITE, self.LUT_BW) # bw r
         self._command(LUT_WHITE_TO_BLACK, self.LUT_BB) # wb w
         self._command(LUT_BLACK_TO_BLACK, self.LUT_WB) # bb b
-
     # draw the current frame memory
     def display_frame(self, frame_buffer):
         self._command(RESOLUTION_SETTING, ustruct.pack(">HH", EPD_WIDTH, EPD_HEIGHT))
@@ -144,7 +139,6 @@ class EPD:
         self._command(VCOM_AND_DATA_INTERVAL_SETTING)
         self._command(0x97) # VBDF 17|D7 VBDW 97  VBDB 57  VBDF F7  VBDW 77  VBDB 37  VBDR B7
         # TODO should ^ this be _data(0x97), not sure what it does
-
         if (frame_buffer != None):
             self._command(DATA_START_TRANSMISSION_1)
             for i in range(0, self.width * self.height // 8):
@@ -154,12 +148,10 @@ class EPD:
             for i in range(0, self.width * self.height // 8):
                 self._data(bytearray([frame_buffer[i]]))
             sleep_ms(2)
-
         self.set_lut()
         self._command(DISPLAY_REFRESH)
         sleep_ms(100)
         self.wait_until_idle()
-
     # to wake call reset() or init()
     def sleep(self):
         self._command(VCOM_AND_DATA_INTERVAL_SETTING, b'\x17') # border floating
@@ -171,3 +163,4 @@ class EPD:
         self._command(POWER_OFF)
         self.wait_until_idle()
         self._command(DEEP_SLEEP, b'\xA5')
+
