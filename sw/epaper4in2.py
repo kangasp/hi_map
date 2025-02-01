@@ -130,6 +130,10 @@ class EPD:
         delay(_reset_duration > 10 ? _reset_duration : 10);
         '''
         self.rst(1)
+        sleep_ms(10)
+        self.rst(0)
+        sleep_ms(100)
+        self.rst(1)
         sleep_ms(100)
         self.rst(0)
         sleep_ms(2)
