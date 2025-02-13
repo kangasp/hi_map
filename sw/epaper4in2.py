@@ -74,7 +74,8 @@ VCM_DC_SETTING                 = const(0x82)
 #READ_OTP                       = const(0xA2)
 #POWER_SAVING                   = const(0xE3)
 
-BUSY = const(0)  # 0=busy, 1=idle
+# BUSY = const(0)  # 0=busy, 1=idle
+BUSY = const(1)
 
 class EPD:
     def __init__(self, spi, cs, dc, rst, busy):
@@ -132,13 +133,9 @@ class EPD:
         self.rst(1)
         sleep_ms(10)
         self.rst(0)
-        sleep_ms(100)
-        self.rst(1)
-        sleep_ms(100)
-        self.rst(0)
         sleep_ms(2)
         self.rst(1)
-        sleep_ms(100)
+        sleep_ms(2)
     def set_lut(self):
         self._command(LUT_FOR_VCOM, self.LUT_VCOM0)    # vcom
         self._command(LUT_WHITE_TO_WHITE, self.LUT_WW) # ww --

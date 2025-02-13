@@ -9,11 +9,13 @@ def current_verion():
             ret = int(json.load(f)['version'])
     return ret
 
+
 def latest_version_info(version_url):
     print(f'Checking for latest version at: {version_url}')
     response = urequests.get(version_url)
     data = json.loads(response.text)
     return data
+
 
 def save_from_url(file_name, url):
     ret = False
@@ -28,6 +30,7 @@ def save_from_url(file_name, url):
         print(f'Firmware download error found - {file_url}, {response.status_code}.')
     return ret
 
+
 def update_files(files, url):
     ret = True
     for f in files:
@@ -36,3 +39,4 @@ def update_files(files, url):
             ret = False
             break
     return ret
+
