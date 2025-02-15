@@ -133,16 +133,43 @@ e.clear(black=True)
 e.draw_display()
 e.clear()
 e.draw_display()
+
+import framebuf
+w = 400
+h = 300
+x = 0
+y = 0
 buf = bytearray(w * h // 8)
 fb = framebuf.FrameBuffer(buf, w, h, framebuf.MONO_HLSB)
 black = 0
 white = 1
 fb.fill(white)
 fb.text('Hello Again',30,0,black)
-e.set_ram(fb)
+e.set_ram(buf)
 e.draw_display()
 
 
+import freesans20
+from writer import Writer
+class NotionalDisplay(framebuf.FrameBuffer):
+    def __init__(self, width, height, buffer):
+        self.width = width
+        self.height = height
+        self.buffer = buffer
+        self.mode = framebuf.MONO_HLSB
+        super().__init__(self.buffer, self.width, self.height, self.mode)
+    def show(self):
+        ...
+
+
+my_display = NotionalDisplay(400, 300, buf)
+wri = Writer(my_display, freesans20)
+
+Writer.set_textpos(my_display, 0, 0)
+wri.printstring('Sunday\n')
+my_display.show()
+e.set_ram(buf)
+e.draw_display()
 
 
 
