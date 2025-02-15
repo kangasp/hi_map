@@ -1,20 +1,34 @@
 from machine import Pin, SPI
 from time import sleep_ms
+from micropython import const
+
+
+
 
 # Display resolution
 EPD_WIDTH  = const(400)
 EPD_HEIGHT = const(300)
 
+
+
+
+
+
+
+
+
+
+
+
+
+# Default Pin Settings
 sck = Pin(18)
-miso = Pin(12)
+miso = Pin(12) # This isn't really used, but setup in spi anyway
 mosi = Pin(23) # DIN
 cs = Pin(5)
 dc = Pin(17)
 rst = Pin(16)
 busy = Pin(4)
-# spi = SPI(2, baudrate=20000000, polarity=0, phase=0, sck=sck, miso=miso, mosi=mosi)
-# spi = SPI(2, baudrate=50000, polarity=0, phase=0, sck=sck, miso=miso, mosi=mosi)
-
 
 class EPD_PK:
     def __init__(self, miso=12, mosi=23, sck=18, cs=5, dc=17, reset=16, busy=4,baudrate=50000, width=400, height=300):
@@ -74,7 +88,7 @@ class EPD_PK:
         self.cs(1)
 
     def end_frame(self):
-        self._cmd(b'\x21', b'\x40\x00')
+        self._cmd(b'\x21', b'\x40\x00') # Display Update Control, 0x40=bypass red ram, 0x00=Single chain
         self._cmd(b'\x1A', b'\x6E')
         self._cmd(b'\x22', b'\xD7')
         self._cmd(b'\x20')
