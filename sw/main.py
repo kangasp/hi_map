@@ -108,6 +108,7 @@ fb = framebuf.FrameBuffer(buf, w, h, framebuf.MONO_HLSB)
 black = 0
 white = 1
 fb.fill(white)
+fb.text('Hello World',30,0,black)
 # --------------------
 print('Frame buffer things')
 fb.fill(white)
@@ -123,16 +124,24 @@ for row in range(0,36):
 fb.text('Line 36',0,288,black)
 
 
-
-
-e.display_frame(fb)
-
-
 import epaper_pk
 e = epaper_pk.EPD_PK()
 e.init()
-e.snd_e()
-e.d
+e.clear()
+e.draw_display()
+e.clear(black=True)
+e.draw_display()
+e.clear()
+e.draw_display()
+buf = bytearray(w * h // 8)
+fb = framebuf.FrameBuffer(buf, w, h, framebuf.MONO_HLSB)
+black = 0
+white = 1
+fb.fill(white)
+fb.text('Hello Again',30,0,black)
+e.set_ram(fb)
+e.draw_display()
+
 
 
 
