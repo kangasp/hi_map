@@ -16,7 +16,6 @@ V_URL = G_URL + "version.json"
 KR_URL = "https://api.weather.gov/gridpoints/HFO/240,91/forecast"
 
 
-
 # headers = {'User-Agent': "hi_map",
 #         'accept': "application/geo+json",
 #         'Cache-Control': 'no-cache'}
@@ -58,25 +57,11 @@ def update():
 
 
 #########  THIS CODE WORKS.  This is what we're going with. ###########
-from color_setup import ssd  # Create a display instance
-from gui.core.nanogui import refresh
-from gui.core.writer import Writer
-from gui.core.colors import *
-from gui.widgets.label import Label
-import gui.fonts.freesans20 as freesans20
+from display import Display
+d = Display()
+d.update_display("TITLE", "body")
 
-refresh(ssd)  # Initialise and clear display.
-Writer.set_textpos(ssd, 0, 0)  # In case previous tests have altered it
-wri = Writer(ssd, freesans20, verbose=False)
-wri.set_clip(True, True, False)
 
-# End of boilerplate code. This is our application:
-Label(wri, 2, 2, 'Hello world!')
-refresh(ssd)
-ssd.set_partial()
-ssd.fill(0)
-Label(wri, 2, 20, 'Hello world!')
-refresh(ssd)
 #########  THIS CODE WORKS.  This is what we're going with. ###########
 
 
@@ -145,9 +130,11 @@ val_old = r.value()
 while True:
     val_new = r.value()
     if val_old != val_new:
-        val_old = val_new
         print('result =', val_new)
-    time.sleep_ms(50)
+        val_old = val_new
+        d.update_display("TITLE", f"num: {val_new}")
+    else:
+        time.sleep_ms(50)
 
 Pin( 36, Pin.OUT)
 
