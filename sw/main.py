@@ -5,6 +5,9 @@ from time import sleep
 import machine
 import os
 import ota as ota
+import time
+from rotary_irq_esp import RotaryIRQ
+from display import Display
 
 SSID = ""
 PWORD = ""
@@ -15,6 +18,7 @@ V_URL = G_URL + "version.json"
 # TODO:  Get this grid programatically based on GPS coords
 KR_URL = "https://api.weather.gov/gridpoints/HFO/240,91/forecast"
 
+_NUM_LOCALS = 3
 
 # headers = {'User-Agent': "hi_map",
 #         'accept': "application/geo+json",
@@ -25,7 +29,6 @@ KR_URL = "https://api.weather.gov/gridpoints/HFO/240,91/forecast"
 # data = json.loads(response.text)
 # data['properties']['periods'][0]['name']
 # data['properties']['periods'][0]['detailedForecast']
-
 
 
 def connect_wifi(ssid, password)->bool:
@@ -57,9 +60,6 @@ def update():
 
 
 #########  THIS CODE WORKS.  This is what we're going with. ###########
-from display import Display
-d = Display()
-d.update_display("TITLE", "body")
 
 
 #########  THIS CODE WORKS.  This is what we're going with. ###########
@@ -69,73 +69,36 @@ d.update_display("TITLE", "body")
 # LED Code
 
 import machine, neopixel
-np = neopixel.NeoPixel(machine.Pin(4), 8)
-np[0] = (255, 0, 0) # set to red, full brightness
-np[1] = (0, 128, 0) # set to green, half brightness
-np[2] = (0, 0, 64)  # set to blue, quarter brightness
-np.write()
-
-import time
-
-def demo(np):
-    n = np.n
-
-    # cycle
-    for i in range(4 * n):
-        for j in range(n):
-            np[j] = (0, 0, 0)
-        np[i % n] = (255, 255, 255)
-        np.write()
-        time.sleep_ms(25)
-
-    # bounce
-    for i in range(4 * n):
-        for j in range(n):
-            np[j] = (0, 0, 128)
-        if (i // n) % 2 == 0:
-            np[i % n] = (0, 0, 0)
-        else:
-            np[n - 1 - (i % n)] = (0, 0, 0)
-        np.write()
-        time.sleep_ms(60)
-
-    # fade in/out
-    for i in range(0, 4 * 256, 8):
-        for j in range(n):
-            if (i // 256) % 2 == 0:
-                val = i & 0xff
-            else:
-                val = 255 - (i & 0xff)
-            np[j] = (val, 0, 0)
-        np.write()
-
-    # clear
-    for i in range(n):
-        np[i] = (0, 0, 0)
-    np.write()
+class My_led():
+    def __init__(self, pin=15, num_led=_NUM_LOCALS +1):
+        self.led_num = num_led
+        self.np = neopixel.NeoPixel(machine.Pin(pin), num_led)
+    def light_one(self, idx, color=(100,100,100)):
+        for i in range(self.led_num):
+            self.np[i] = (0,0,0)
+        self.np[idx] = color
+        self.np.write()
 
 
-
-import time
-from rotary_irq_esp import RotaryIRQ
-r = RotaryIRQ(pin_num_clk=32, 
+def run_app():
+    l = My_led()
+    d = Display()
+    d.clear()
+    r = RotaryIRQ(pin_num_clk=32, 
               pin_num_dt=33, 
               min_val=0, 
-              max_val=5,
+              max_val=_NUM_LOCALS,
               pull_up=True,
               reverse=True, 
               range_mode=RotaryIRQ.RANGE_WRAP)
-              
-val_old = r.value()
-while True:
-    val_new = r.value()
-    if val_old != val_new:
-        print('result =', val_new)
-        val_old = val_new
-        d.update_display("TITLE", f"num: {val_new}")
-    else:
-        time.sleep_ms(50)
-
-Pin( 36, Pin.OUT)
-
+    val_old = r.value()
+    while True:
+        val_new = r.value()
+        if val_old != val_new:
+            print('result =', val_new)
+            val_old = val_new
+            d.update_display("TITLE", f"num: {val_new}")
+            l.light_one(int(val_new))
+        else:
+            time.sleep_ms(50)
 
