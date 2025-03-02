@@ -57,136 +57,27 @@ def update():
 # machine.reset()
 
 
+#########  THIS CODE WORKS.  This is what we're going with. ###########
+from color_setup import ssd  # Create a display instance
+from gui.core.nanogui import refresh
+from gui.core.writer import Writer
+from gui.core.colors import *
+from gui.widgets.label import Label
+import gui.fonts.freesans20 as freesans20
 
+refresh(ssd)  # Initialise and clear display.
+Writer.set_textpos(ssd, 0, 0)  # In case previous tests have altered it
+wri = Writer(ssd, freesans20, verbose=False)
+wri.set_clip(True, True, False)
 
-
-
-# Another option:
-## OFFICIAL, FOR SURE THE LAST ###
-import epaper4in2
-from machine import Pin, SPI
-sck = Pin(18)
-miso = Pin(12)
-mosi = Pin(23) # DIN
-cs = Pin(5)
-dc = Pin(17)
-rst = Pin(16)
-busy = Pin(4)
-# spi = SPI(2, baudrate=20000000, polarity=0, phase=0, sck=sck, miso=miso, mosi=mosi)
-spi = SPI(2, baudrate=50000, polarity=0, phase=0, sck=sck, miso=miso, mosi=mosi)
-e = epaper4in2.EPD(spi, cs, dc, rst, busy)
-e.init()
-
-
-
-
-
-import epaper4in2
-from machine import Pin, SPI
-cs = Pin(5)
-dc = Pin(17)
-rst = Pin(16)
-busy = Pin(4)
-spi = SPI(1, 40000000, sck=Pin(14), mosi=Pin(13), miso=Pin(12))
-e = epaper4in2.EPD(spi, cs, dc, rst, busy)
-e.init()
-
-
-
-
-w = 400
-h = 300
-x = 0
-y = 0
-
-# --------------------
-# use a frame buffer
-# 400 * 300 / 8 = 15000 - thats a lot of pixels
-import framebuf
-buf = bytearray(w * h // 8)
-fb = framebuf.FrameBuffer(buf, w, h, framebuf.MONO_HLSB)
-black = 0
-white = 1
-fb.fill(white)
-fb.text('Hello World',30,0,black)
-# --------------------
-print('Frame buffer things')
-fb.fill(white)
-fb.text('Hello World',30,0,black)
-fb.pixel(30, 10, black)
-fb.hline(30, 30, 10, black)
-fb.vline(30, 50, 10, black)
-fb.line(30, 70, 40, 80, black)
-fb.rect(30, 90, 10, 10, black)
-fb.fill_rect(30, 110, 10, 10, black)
-for row in range(0,36):
-	fb.text(str(row),0,row*8,black)
-fb.text('Line 36',0,288,black)
-
-
-import epaper_pk
-e = epaper_pk.EPD_PK()
-e.init()
-e.clear()
-e.draw_display()
-e.clear(black=True)
-e.draw_display()
-e.clear()
-e.draw_display()
-
-import framebuf
-w = 400
-h = 300
-x = 0
-y = 0
-buf = bytearray(w * h // 8)
-fb = framebuf.FrameBuffer(buf, w, h, framebuf.MONO_HLSB)
-black = 0
-white = 1
-fb.fill(white)
-fb.text('Hello Again',30,0,black)
-e.set_ram(buf)
-e.draw_display()
-
-
-import freesans20
-from writer import Writer
-class NotionalDisplay(framebuf.FrameBuffer):
-    def __init__(self, width, height, buffer):
-        self.width = width
-        self.height = height
-        self.buffer = buffer
-        self.mode = framebuf.MONO_HLSB
-        super().__init__(self.buffer, self.width, self.height, self.mode)
-    def show(self):
-        ...
-
-
-my_display = NotionalDisplay(400, 300, buf)
-wri = Writer(my_display, freesans20)
-
-Writer.set_textpos(my_display, 0, 0)
-wri.printstring('Sunday\n')
-my_display.show()
-e.set_ram(buf)
-e.draw_display()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# End of boilerplate code. This is our application:
+Label(wri, 2, 2, 'Hello world!')
+refresh(ssd)
+ssd.set_partial()
+ssd.fill(0)
+Label(wri, 2, 20, 'Hello world!')
+refresh(ssd)
+#########  THIS CODE WORKS.  This is what we're going with. ###########
 
 
 
@@ -239,5 +130,25 @@ def demo(np):
     np.write()
 
 
+
+import time
+from rotary_irq_esp import RotaryIRQ
+r = RotaryIRQ(pin_num_clk=32, 
+              pin_num_dt=33, 
+              min_val=0, 
+              max_val=5,
+              pull_up=True,
+              reverse=True, 
+              range_mode=RotaryIRQ.RANGE_WRAP)
+              
+val_old = r.value()
+while True:
+    val_new = r.value()
+    if val_old != val_new:
+        val_old = val_new
+        print('result =', val_new)
+    time.sleep_ms(50)
+
+Pin( 36, Pin.OUT)
 
 
