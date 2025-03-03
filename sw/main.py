@@ -8,6 +8,8 @@ import ota as ota
 import time
 from rotary_irq_esp import RotaryIRQ
 from display import Display
+import machine, neopixel
+import asyncio
 
 SSID = ""
 PWORD = ""
@@ -59,16 +61,6 @@ def update():
 # machine.reset()
 
 
-#########  THIS CODE WORKS.  This is what we're going with. ###########
-
-
-#########  THIS CODE WORKS.  This is what we're going with. ###########
-
-
-
-# LED Code
-
-import machine, neopixel
 class My_led():
     def __init__(self, pin=15, num_led=_NUM_LOCALS +1):
         self.led_num = num_led
@@ -80,10 +72,39 @@ class My_led():
         self.np.write()
 
 
-def run_app():
-    l = My_led()
-    d = Display()
-    d.clear()
+class App():
+    def __init__(self, r: RotaryIRQ, d: Display, l: My_led):
+        self.r = r
+        self.d = d
+        self.l = l
+        self.e_r = asyncio.Event()
+        self.e_d = asyncio.Event()
+        asyncio.create_task(self.r_action())
+        asyncio.create_task(self.d_action())
+        self.r.add_listener(self.r_cb)
+
+    def r_cb(self):
+        self.e_r.set()
+
+    async def d_action(self):
+        while True:
+            await self.e_d.wait()
+            self.e_d.clear()
+            print( "1")
+            await self.d.ssd.complete.wait()
+            print( "2")
+            await self.d.update_display("TITLE", "num: {0}".format(self.r.value()), fast=True)
+
+    async def r_action(self):
+        while True:
+            await self.e_r.wait()
+            r = self.r.value()
+            self.l.light_one(int(r))
+            self.e_d.set()
+            self.e_r.clear()
+
+
+async def main():
     r = RotaryIRQ(pin_num_clk=32, 
               pin_num_dt=33, 
               min_val=0, 
@@ -91,14 +112,37 @@ def run_app():
               pull_up=True,
               reverse=True, 
               range_mode=RotaryIRQ.RANGE_WRAP)
-    val_old = r.value()
+    l = My_led()
+    d = Display()
+    await d.clear()
+    ap = App(r, d, l)
     while True:
-        val_new = r.value()
-        if val_old != val_new:
-            print('result =', val_new)
-            val_old = val_new
-            d.update_display("TITLE", f"num: {val_new}")
-            l.light_one(int(val_new))
-        else:
-            time.sleep_ms(50)
+        await asyncio.sleep_ms(10)
+
+
+
+
+
+
+# def run_app():
+#     l = My_led()
+#     d = Display()
+#     d.clear()
+#     r = RotaryIRQ(pin_num_clk=32, 
+#               pin_num_dt=33, 
+#               min_val=0, 
+#               max_val=_NUM_LOCALS,
+#               pull_up=True,
+#               reverse=True, 
+#               range_mode=RotaryIRQ.RANGE_WRAP)
+#     val_old = r.value()
+#     while True:
+#         val_new = r.value()
+#         if val_old != val_new:
+#             print('result =', val_new)
+#             val_old = val_new
+#             d.update_display("TITLE", f"num: {val_new}")
+#             l.light_one(int(val_new))
+#         else:
+#             time.sleep_ms(50)
 

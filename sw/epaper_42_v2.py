@@ -102,6 +102,7 @@ class EPD(framebuf.FrameBuffer):
         self._spi.init(baudrate=_BAUD)
         # Busy flag: set immediately on .show(). Cleared when busy pin is logically false.
         self._busy = False
+        print( f"init _busy: {self._busy}")
         # Async API
         self.updated = asyncio.Event()
         self.complete = asyncio.Event()
@@ -272,6 +273,7 @@ class EPD(framebuf.FrameBuffer):
 
     def _show_full(self):
         self._busy = True  # Immediate busy flag. Pin goes low much later.
+        print( f"show_full _busy: {self._busy}")
         if asyncio_running():
             self.updated.clear()
             self.complete.clear()
@@ -286,6 +288,7 @@ class EPD(framebuf.FrameBuffer):
         sb = self._send_bytes()  # Create new instance
         sb()
         self._busy = False
+        print( f"show_full2 _busy: {self._busy}")
         self._display_on()
 
     async def _as_show_full(self):
@@ -304,10 +307,12 @@ class EPD(framebuf.FrameBuffer):
         while self._busy_pin():
             await asyncio.sleep_ms(0)
         self._busy = False
+        print( f"show_full_as _busy: {self._busy}")
         self.complete.set()
 
     def _show_partial(self):
         self._busy = True
+        print( f"show_partial _busy: {self._busy}")
         if asyncio_running():
             self.updated.clear()
             self.complete.clear()
@@ -318,6 +323,7 @@ class EPD(framebuf.FrameBuffer):
         sb = self._send_bytes()  # Instantiate closure
         sb()
         self._busy = False
+        print( f"show_partial2 _busy: {self._busy}")
         self._display_on()
 
     async def _as_show_partial(self):
@@ -331,11 +337,14 @@ class EPD(framebuf.FrameBuffer):
         while self._busy_pin():
             await asyncio.sleep_ms(0)
         self._busy = False
+        print( f"as_show_partial _busy: {self._busy}")
         self.complete.set()
 
     # nanogui API
     def wait_until_ready(self):
         while not self.ready():
+            print(' comp: {0}, updated: {1}, _busy: {2} pin: {3}'.format(
+            self.complete.state, self.updated.state, self._busy, self._busy_pin() ))
             time.sleep_ms(100)
 
     def ready(self):
