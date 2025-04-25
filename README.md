@@ -20,3 +20,7 @@ Physical interactive map of Hawaii.  Uses esp32 to pull weather info and display
 
 
 
+## RTC & Battery
+### Parts:
+* RTC:  MAN#: PCF8563T, JLCPCB#: C7440
+* Batter Charger: TP4056,  C16581 ??

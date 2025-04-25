@@ -1,0 +1,75 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "install_all",
+            "type": "shell",
+            "command": "bash",
+            "args": ["${workspaceFolder}/install_to_board.sh"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "echo",
+            "command": "python",
+            "args": ["~/git_things/micropython_bin/pyboard.py", "--device COM5", "-f cp", "${file}", " :"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "install_file",
+            "type": "shell",
+            "command": "python C:\\Users\\15034\\git_things\\micropython_bin\\pyboard.py --device COM5 -f cp ${file}  :",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "uninstall_file",
+            "type": "shell",
+            "command": "python C:\\Users\\15034\\git_things\\micropython_bin\\pyboard.py --device COM5 -f rm ${input:fileOnBoard}",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "list_files",
+            "type": "shell",
+            "command": "python C:\\Users\\15034\\git_things\\micropython_bin\\pyboard.py --device COM5 -f ls",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "mon",
+            "type": "shell",
+            "command": "python",
+            "args": ["-m", "serial.tools.miniterm", "COM5", "115200"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "test"
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "type": "promptString",
+            "id": "fileOnBoard",
+            "description": "Pick the file to remove."
+        }
+    ]
+}
