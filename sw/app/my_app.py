@@ -55,11 +55,11 @@ WX_LOCALS = { "Kapaau": "20.2358,-155.8118",
             "Waikoloa": "19.9159,-155.8855"
               }
 
-with open('locations.json') as f:
-    j = json.load(f)
-
-with open('urls.json', 'w') as f:
-    json.dump(urls, f)
+# with open('locations.json') as f:
+#     j = json.load(f)
+# 
+# with open('urls.json', 'w') as f:
+#     json.dump(urls, f)
 
 def get_urls(wx_locations):
     d = []
@@ -84,7 +84,7 @@ urls = [
 
 
 # return( response.json()['properties']['periods'][0]['name'], data['properties']['periods'][0]['detailedForecast'] )
-_NUM_LOCALS = 3
+_NUM_LOCALS = 4
 def get_wx_data(urls):
     ret = []
     headers = {'User-Agent': "hi_map",
@@ -98,12 +98,12 @@ def get_wx_data(urls):
         print( "Got it")
     return ret
 
-wx = get_wx_data(urls)
-with open('wx.json', 'w') as f:
-    json.dump(wx, f)
-
-
-wx = get_all_data(urls)
+# wx = get_wx_data(urls)
+# with open('wx.json', 'w') as f:
+#     json.dump(wx, f)
+# 
+# 
+# wx = get_all_data(urls)
 
 def get_data():
     headers = {'User-Agent': "hi_map",
@@ -116,16 +116,12 @@ def get_data():
 
 
 
-def get_wx():
-    try:
-        with open('wx.json', 'r') as f:
-            wx_data = json.load(f)
-            wx_data = f.read()
-        
-    except:
-
-
-
+# def get_wx():
+#     try:
+#         with open('wx.json', 'r') as f:
+#             wx_data = json.load(f)
+#             wx_data = f.read()
+#     except:
 
 
 
@@ -169,7 +165,7 @@ class My_led():
     def __init__(self, pin=15, num_led=_NUM_LOCALS):
         self.led_num = num_led
         self.np = neopixel.NeoPixel(machine.Pin(pin), num_led)
-    def light_one(self, idx, color=(100,100,100)):
+    def light_one(self, idx, color=(10,10,10)):
         for i in range(self.led_num):
             self.np[i] = (0,0,0)
         self.np[idx] = color
@@ -244,7 +240,7 @@ async def enter_display_state():
               pull_up=True,
               reverse=True, 
               range_mode=RotaryIRQ.RANGE_WRAP)
-    wx = await get_wx() 
+    # wx = await get_wx() 
     l = My_led()
     d = Display()
     await d.clear()
@@ -252,6 +248,8 @@ async def enter_display_state():
     while True:
         await asyncio.sleep_ms(10)
 
+
+asyncio.run(enter_display_state())
 
 
 class Setup_App():

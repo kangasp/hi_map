@@ -1,5 +1,11 @@
 
 
+To just start the repl use:
+alias repl="mpremote connect /dev/tty.usbserial-* repl"
+
+
+
+
 To use with vim slime.
 
 Use tmux to open a split window:

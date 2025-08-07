@@ -11,14 +11,17 @@ FONT = "arial10.py arial35.py arial_50.py courier20.py font10.py font6.py freesa
 EXTW = "calendar.py clock.py eclock.py grid.py"
 EXTD = "calendar.py clock_test.py eclock_async.py eclock_test.py"
 ROT = "rotary.py rotary_irq_esp.py"
-APP = "color_setup.py display.py epaper4in2.py my_app.py sleepy.py ota.py writer.py"
+DRV = "boolpalette.py"
+APP = "color_setup.py display.py epaper_42_v2.py my_app.py sleepy.py ota.py writer.py main.py"
 
-ALL_FILES=[[ROT, "lib/micropython-rotary", "drivers"],
-           [CORE, "lib/micropython-nano-gui/gui/core", "gui/core"],
-           [WIDG, "lib/micropython-nano-gui/gui/widgets", "gui/widgets"],
-           [FONT, "lib/micropython-nano-gui/gui/fonts", "gui/fonts"],
-           [EXTW, "lib/micropython-nano-gui/extras/widgets", "extras/widgets"],
-           [EXTD, "lib/micropython-nano-gui/extras/demos", "extras/demos"]]
+ALL_FILES=[[ROT,  "sw/lib/micropython-rotary/", "/"],
+           [CORE, "sw/lib/micropython-nano-gui/gui/core/", "/gui/core/"],
+           [WIDG, "sw/lib/micropython-nano-gui/gui/widgets/", "/gui/widgets/"],
+           [FONT, "sw/lib/micropython-nano-gui/gui/fonts/", "/gui/fonts/"],
+           [EXTW, "sw/lib/micropython-nano-gui/extras/widgets/", "/extras/widgets/"],
+           [EXTD, "sw/lib/micropython-nano-gui/extras/demos/", "/extras/demos/"],
+           [DRV, "sw/lib/micropython-nano-gui/drivers/", "/drivers/"],
+           [APP,  "sw/app/", "/"]]
 
 
 
@@ -48,23 +51,30 @@ def remove_all_files():
         print(f"Removing {tgt}")
         cmd_fs(["rm", "-r", tgt])
 
-def full_install():
+def install_app():
+    cmd_fs(["cp", f"sw/app/my_app.py", f":/my_app.py"])
+
+def install_all():
     for D in DIRS.split():
+        print(f"Making directory {D}")
         cmd_fs([f"mkdir", D])
     for files, from_dir, to_dir in ALL_FILES:
         for file in files.split():
             print(f"Copying {file} to {to_dir}")
-            cmd_fs(["cp", f"{from_dir}/{file}", f":/{to_dir}/{file}"])
+            cmd_fs(["cp", f"{from_dir}{file}", f":{to_dir}{file}"])
 
 def main():
-    if len(sys.argv) == 1:
-        print(list_files(' '))
     if sys.argv[1] == "clean_all":
         remove_all_files()
-    elif sys.argv[1] == "full_install":
-        full_install()
+    elif sys.argv[1] == "install_all":
+        install_all()
+    elif sys.argv[1] == "install_app":
+        install_app()
     else:
-        print(cmd_fs(sys.argv[1:]))
+        cmd = f"{MP_CMD} {' '.join(sys.argv[1:])}"
+        print(run_mpremote(cmd))
+        # exec(cmd)
+        # print(cmd_fs(sys.argv[1:]))
 
 if __name__ == "__main__":
     main()
