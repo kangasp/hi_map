@@ -1,6 +1,6 @@
 [submodule "lib/micropython-nano-gui"]
-	path = lib/micropython-nano-gui
+	path = sw/lib/micropython-nano-gui
 	url = git@github.com:peterhinch/micropython-nano-gui.git
 [submodule "lib/micropython-rotary"]
-	path = lib/micropython-rotary
+	path = sw/lib/micropython-rotary
 	url = git@github.com:miketeachman/micropython-rotary.git
