@@ -14,7 +14,6 @@ import asyncio
 G_URL = "https://raw.githubusercontent.com/kangasp/hi_map/main/sw/"
 V_URL = G_URL + "version.json"
 
-
 # TODO:  Get this grid programatically based on GPS coords
 KR_URL = "https://api.weather.gov/gridpoints/HFO/240,91/forecast"
 
@@ -91,7 +90,18 @@ def get_wx_data(urls):
     for u in urls:
         print( f"fetching {u}")
         response = urequests.get(u[1], headers=headers)
-        ret[u[0]] = response.json()['properties']['periods'][0]['detailedForecast']
+        all_data = response.json()
+        ret[u[0]] = [ all_data['properties']['periods'][0]['detailedForecast'] ]
+        for j in range(0, len(all_data['properties']['periods'])):
+            ret[u[0]].append( [
+                    all_data['properties']['periods'][j]['probabilityOfPrecipitation']['value'], 
+                    all_data['properties']['periods'][j]['name'],
+                    all_data['properties']['periods'][j]['temperature'],
+                    all_data['properties']['periods'][j]['temperatureUnit'],
+                    all_data['properties']['periods'][j]['windSpeed'],
+                    all_data['properties']['periods'][j]['windDirection'],
+                    all_data['properties']['periods'][j]['shortForecast']
+                    ] )
         print( "Got it")
     with open('wx.json', 'w') as f:
         json.dump(ret, f)
@@ -126,7 +136,7 @@ def get_wx():
     return wx_data
 
 
-def connect_wifi(ssid=SSID, password=PWORD)->bool:
+def connect_wifi(ssid, password)->bool:
     ret = False
     sta_if = network.WLAN(network.STA_IF)
     sta_if.active(True)
