@@ -52,3 +52,5 @@ Mkfile.old
 dkms.conf
 *.un~
 sw/__pycache__
+sw/private
+wx.json

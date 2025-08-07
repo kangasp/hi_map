@@ -8,12 +8,9 @@ import os
 import ota as ota
 import time
 from rotary_irq_esp import RotaryIRQ
-from display import Display
 import machine, neopixel
 import asyncio
 
-SSID = ""
-PWORD = ""
 G_URL = "https://raw.githubusercontent.com/kangasp/hi_map/main/sw/"
 V_URL = G_URL + "version.json"
 
@@ -86,7 +83,7 @@ urls = [
 # return( response.json()['properties']['periods'][0]['name'], data['properties']['periods'][0]['detailedForecast'] )
 _NUM_LOCALS = 4
 def get_wx_data(urls):
-    ret = []
+    ret = {}
     headers = {'User-Agent': "hi_map",
             'accept': "application/geo+json",
             'Cache-Control': 'no-cache'}
@@ -94,9 +91,12 @@ def get_wx_data(urls):
     for u in urls:
         print( f"fetching {u}")
         response = urequests.get(u[1], headers=headers)
-        ret.append(response.json()['properties']['periods'][0]['detailedForecast'])
+        ret[u[0]] = response.json()['properties']['periods'][0]['detailedForecast']
         print( "Got it")
-    return ret
+    with open('wx.json', 'w') as f:
+        json.dump(ret, f)
+    print( "Wrote wx.json")
+    # return ret
 
 # wx = get_wx_data(urls)
 # with open('wx.json', 'w') as f:
@@ -116,17 +116,17 @@ def get_data():
 
 
 
-# def get_wx():
-#     try:
-#         with open('wx.json', 'r') as f:
-#             wx_data = json.load(f)
-#             wx_data = f.read()
-#     except:
+def get_wx():
+    try:
+        with open('wx.json', 'r') as f:
+            wx_data = json.load(f)
+    except:
+        print("No wx data found, fetching from API")
+        wx_data = None
+    return wx_data
 
 
-
-
-def connect_wifi(ssid, password)->bool:
+def connect_wifi(ssid=SSID, password=PWORD)->bool:
     ret = False
     sta_if = network.WLAN(network.STA_IF)
     sta_if.active(True)
@@ -201,10 +201,12 @@ Download all the weather only on timed wakeup or if we don't have it.
 '''
 
 class Display_App():
-    def __init__(self, r: RotaryIRQ, d: Display, l: My_led):
+    def __init__(self, r: RotaryIRQ, d: Display, l: My_led, wx: dict):
         self.r = r
         self.d = d
         self.l = l
+        self.wx = wx
+        self.keys = list(wx.keys())
         self.e_r = asyncio.Event()
         self.e_d = asyncio.Event()
         asyncio.create_task(self.r_action())
@@ -221,7 +223,10 @@ class Display_App():
             print( "1")
             await self.d.ssd.complete.wait()
             print( "2")
-            await self.d.update_display("TITLE", "num: {0}".format(self.r.value()), fast=True)
+            r = self.r.value()
+            title = self.keys[r]
+            weather = self.wx[title]
+            await self.d.update_display(f"{r}: {title}", f"{weather}", fast=True)
 
     async def r_action(self):
         while True:
@@ -232,7 +237,8 @@ class Display_App():
             self.e_r.clear()
 
 
-async def enter_display_state():
+async def enter_display_state(wx:dict):
+    from display import Display
     r = RotaryIRQ(pin_num_clk=32, 
               pin_num_dt=33, 
               min_val=0, 
@@ -244,12 +250,27 @@ async def enter_display_state():
     l = My_led()
     d = Display()
     await d.clear()
-    ap = Display_App(r, d, l)
+    await d.clear()
+    ap = Display_App(r, d, l, wx)
     while True:
         await asyncio.sleep_ms(10)
 
 
-asyncio.run(enter_display_state())
+
+with open('conf.json') as f:
+    conf = json.load(f)
+
+SSID = conf['wifi']['ssid']
+PWORD = conf['wifi']['password']
+connect_wifi(SSID, PWORD)
+
+
+wx = get_wx()
+if wx is None:
+    print("No weather data found, fetching from API")
+    get_wx_data(urls)
+    wx = get_wx()
+asyncio.run(enter_display_state(wx))
 
 
 class Setup_App():
