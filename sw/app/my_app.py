@@ -79,9 +79,33 @@ urls = [
  ('Waikoloa', 'https://api.weather.gov/gridpoints/HFO/237,82/forecast')]
 
 
+def show_flash():
+    import os
+try:
+    s = os.statvfs('/')
+    total_blocks = s[0]
+    free_blocks = s[3]
+    block_size = s[1]
+    total_flash_kb = (total_blocks * block_size) / 1024
+    free_flash_kb = (free_blocks * block_size) / 1024
+    used_flash_kb = total_flash_kb - free_flash_kb
+    print(f"Total Flash: {total_flash_kb:.2f} KB")
+    print(f"Free Flash: {free_flash_kb:.2f} KB")
+    print(f"Used Flash: {used_flash_kb:.2f} KB")
+except OSError as e:
+    print(f"Error accessing filesystem information: {e}")
+
+
+
+
+
+
+
 # return( response.json()['properties']['periods'][0]['name'], data['properties']['periods'][0]['detailedForecast'] )
 _NUM_LOCALS = 4
 def get_wx_data(urls):
+    import micropython as _m
+    import gc
     ret = {}
     headers = {'User-Agent': "hi_map",
             'accept': "application/geo+json",
@@ -89,22 +113,26 @@ def get_wx_data(urls):
     # response = urequests.get("https://api.weather.gov", headers=headers)
     for u in urls:
         print( f"fetching {u}")
+        gc.collect()
+        _m.mem_info()
         response = urequests.get(u[1], headers=headers)
-        all_data = response.json()
-        ret[u[0]] = [ all_data['properties']['periods'][0]['detailedForecast'] ]
-        for j in range(0, len(all_data['properties']['periods'])):
-            ret[u[0]].append( [
-                    all_data['properties']['periods'][j]['probabilityOfPrecipitation']['value'], 
-                    all_data['properties']['periods'][j]['name'],
-                    all_data['properties']['periods'][j]['temperature'],
-                    all_data['properties']['periods'][j]['temperatureUnit'],
-                    all_data['properties']['periods'][j]['windSpeed'],
-                    all_data['properties']['periods'][j]['windDirection'],
-                    all_data['properties']['periods'][j]['shortForecast']
-                    ] )
-        print( "Got it")
-    with open('wx.json', 'w') as f:
-        json.dump(ret, f)
+        with open(u[0], 'w') as f:
+            json.dump(response.json(), f)
+        # all_data = response.json()
+        # ret[u[0]] = [ all_data['properties']['periods'][0]['detailedForecast'] ]
+        # for j in range(0, len(all_data['properties']['periods'])):
+        #     ret[u[0]].append( [
+        #             all_data['properties']['periods'][j]['probabilityOfPrecipitation']['value'], 
+        #             all_data['properties']['periods'][j]['name'],
+        #             all_data['properties']['periods'][j]['temperature'],
+        #             all_data['properties']['periods'][j]['temperatureUnit'],
+        #             all_data['properties']['periods'][j]['windSpeed'],
+        #             all_data['properties']['periods'][j]['windDirection'],
+        #             all_data['properties']['periods'][j]['shortForecast']
+        #             ] )
+        print( f"writing {u[0]} to flash")
+        # with open('wx.json', 'w') as f:
+        #     json.dump(ret, f)
     print( "Wrote wx.json")
     # return ret
 
@@ -126,12 +154,12 @@ def get_data():
 
 
 
-def get_wx():
+def get_wx(place):
     try:
-        with open('wx.json', 'r') as f:
-            wx_data = json.load(f)
+        with open(place, 'r') as f:
+            wx_data = json.load(f)['properties']['periods'][0]['detailedForecast']
     except:
-        print("No wx data found, fetching from API")
+        print("No wx data found.")
         wx_data = None
     return wx_data
 
@@ -211,12 +239,11 @@ Download all the weather only on timed wakeup or if we don't have it.
 '''
 
 class Display_App():
-    def __init__(self, r: RotaryIRQ, d: Display, l: My_led, wx: dict):
+    def __init__(self, r: RotaryIRQ, d: Display, l: My_led, places: list):
         self.r = r
         self.d = d
         self.l = l
-        self.wx = wx
-        self.keys = list(wx.keys())
+        self.places = places
         self.e_r = asyncio.Event()
         self.e_d = asyncio.Event()
         asyncio.create_task(self.r_action())
@@ -234,8 +261,9 @@ class Display_App():
             await self.d.ssd.complete.wait()
             print( "2")
             r = self.r.value()
-            title = self.keys[r]
-            weather = self.wx[title]
+            title = self.places[r]
+            weather = get_wx(title)
+        # ret[u[0]] = [ all_data['properties']['periods'][0]['detailedForecast'] ]
             await self.d.update_display(f"{r}: {title}", f"{weather}", fast=True)
 
     async def r_action(self):
@@ -247,7 +275,13 @@ class Display_App():
             self.e_r.clear()
 
 
-async def enter_display_state(wx:dict):
+# from display import Display
+# d = Display()
+# asyncio.run(d.update_display("Test", "This is a test of the TextBox widget."))
+# asyncio.run(d.refresh(fast=False))
+
+
+async def enter_display_state(places: list):
     from display import Display
     r = RotaryIRQ(pin_num_clk=32, 
               pin_num_dt=33, 
@@ -261,7 +295,7 @@ async def enter_display_state(wx:dict):
     d = Display()
     await d.clear()
     await d.clear()
-    ap = Display_App(r, d, l, wx)
+    ap = Display_App(r, d, l, places)
     while True:
         await asyncio.sleep_ms(10)
 
@@ -275,12 +309,18 @@ PWORD = conf['wifi']['password']
 connect_wifi(SSID, PWORD)
 
 
-wx = get_wx()
-if wx is None:
-    print("No weather data found, fetching from API")
-    get_wx_data(urls)
-    wx = get_wx()
-asyncio.run(enter_display_state(wx))
+# wx = get_wx()
+# if wx is None:
+#     print("No weather data found, fetching from API")
+#     get_wx_data(urls)
+#     wx = get_wx()
+
+def run_app():
+    places = [x[0] for x in urls]
+    asyncio.run(enter_display_state(places))
+
+run_app()
+
 
 
 class Setup_App():
