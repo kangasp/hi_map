@@ -123,6 +123,7 @@ class EPD(framebuf.FrameBuffer):
         self._mvb = memoryview(self._buf)
         self._ibuf = bytearray(1000)  # Buffer for inverted pixels
         mode = framebuf.MONO_HLSB
+        # mode = framebuf.MONO_VLSB
         self.palette = BoolPalette(mode)  # Enable CWriter.
         super().__init__(self._buf, _EPD_WIDTH, _EPD_HEIGHT, mode)
         self.init()

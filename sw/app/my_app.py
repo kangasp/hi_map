@@ -153,7 +153,6 @@ def get_data():
     return( response.json()['properties']['periods'][0]['detailedForecast'] )
 
 
-
 def get_wx(place):
     try:
         with open(place, 'r') as f:
@@ -162,6 +161,16 @@ def get_wx(place):
         print("No wx data found.")
         wx_data = None
     return wx_data
+
+def get_wx_list(place):
+    ret = []
+    print(f"Getting wx for {place}")
+    with open(place, 'r') as f:
+        p = json.load(f)['properties']['periods']
+    for j in range(0,12,2):
+        print("{0}: {1} deg, wind {2}\n   {3} ".format(p[j]['name'], p[j]['temperature'], p[j]['windSpeed'], p[j]['shortForecast']))
+        ret.append("{0}: {1} deg, wind {2}\n\t\t{3} ".format(p[j]['name'], p[j]['temperature'], p[j]['windSpeed'], p[j]['shortForecast']))
+    return ret
 
 
 def connect_wifi(ssid, password)->bool:
@@ -262,10 +271,12 @@ class Display_App():
             print( "2")
             r = self.r.value()
             title = self.places[r]
-            weather = get_wx(title)
+            # weather = get_wx(title)
+            wx_list = get_wx_list(title)
         # ret[u[0]] = [ all_data['properties']['periods'][0]['detailedForecast'] ]
-            await self.d.update_display(f"{r}: {title}", f"{weather}", fast=True)
-
+            print( f"Updating display for {title}")
+            print(f"{wx_list[0]}\n{wx_list[1]}\n{wx_list[2]}\n{wx_list[3]}\n{wx_list[4]}")
+            await self.d.update_display(f"{title}", f"{wx_list[0]}\n{wx_list[1]}\n{wx_list[2]}\n{wx_list[3]}\n{wx_list[4]}\n{wx_list[5]}", fast=True)
     async def r_action(self):
         while True:
             await self.e_r.wait()
@@ -279,6 +290,41 @@ class Display_App():
 # d = Display()
 # asyncio.run(d.update_display("Test", "This is a test of the TextBox widget."))
 # asyncio.run(d.refresh(fast=False))
+
+
+# "name": "Today",
+# "temperature": 83,
+# "windSpeed": "3 to 12 mph",
+# "shortForecast": "Scattered Rain Showers",
+# "probabilityOfPrecipitation": {"unitCode": "wmoUnit:percent", "value": 36 },
+
+
+
+'''
+"windSpeed": "3 to 12 mph",
+                "windDirection": "ENE",
+                "detailedForecast": "Scattered rain showers. Mostly sunny, with a high near 83. East northeast wind 3 to 12 mph. Chance of precipitation is 40%. New rainfall amounts less than a tenth of an inch possible.",
+                "startTime": "2025-08-16T07:00:00-10:00",
+"shortForecast": "Scattered Rain Showers",
+"name": "Today",
+                "temperatureUnit": "F",
+                "isDaytime": true,
+                "endTime": "2025-08-16T18:00:00-10:00",
+                "temperatureTrend": "",
+"temperature": 83,
+                "probabilityOfPrecipitation": {
+                    "unitCode": "wmoUnit:percent",
+"value": 36
+                },
+                "icon": "https://api.weather.gov/icons/land/day/rain_showers,40/rain_showers,20?size=medium",
+                "number": 1
+
+'''
+
+
+
+
+
 
 
 async def enter_display_state(places: list):
@@ -306,7 +352,7 @@ with open('conf.json') as f:
 
 SSID = conf['wifi']['ssid']
 PWORD = conf['wifi']['password']
-connect_wifi(SSID, PWORD)
+# connect_wifi(SSID, PWORD)
 
 
 # wx = get_wx()

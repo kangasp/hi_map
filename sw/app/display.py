@@ -14,12 +14,13 @@ class Display():
         self.ssd = _ssd
         Writer.set_textpos(self.ssd, 0, 0)
         self.writer_title = Writer(self.ssd, arial35, verbose=False)
-        self.writer_title.set_clip(True, True, False)
-        self.title = Label(self.writer_title, 0, 150, 'Title', align=ALIGN_CENTER)
+        # self.writer_title.set_clip(True, True, False)
+        # self.title = Label(self.writer_title, 0, 150, 'Title', align=ALIGN_CENTER)
+        self.title = Textbox(self.writer_title, 2, 30, 350, 1, clip=False )
         Writer.set_textpos(self.ssd, 0, 0)
         self.writer_body = Writer(self.ssd, freesans20, verbose=False)
         # self.body = Textbox(self.writer_body, 40, 20, 300, 9, clip=False, bdcolor=True )
-        self.body = Textbox(self.writer_body, 35, 10, 380, 13, clip=False, bdcolor=False )
+        self.body = Textbox(self.writer_body, 41, 10, 380, 12, clip=False, bdcolor=False )
         # self.writer_body = Writer(self.ssd, freesans20, verbose=False)
         # self.writer_body.set_clip(True, True, False)
         # self.body = Label(self.writer_body, 100, 100, 'Body')
@@ -42,7 +43,9 @@ class Display():
         await self.ssd.complete.wait()            
     
     async def update_display(self, title, body, fast=True):
-        self.title.value(title)
+        self.title.clear()
+        self.title.append(title)
+        # self.title.value(title)
         self.body.clear()
         self.body.append(body)
         # self.body.value(body)
