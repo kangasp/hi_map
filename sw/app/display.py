@@ -30,7 +30,7 @@ class Display():
         # _w = Writer(self.ssd, courier20, verbose=False)
         # _w = Writer(self.ssd, arial10, verbose=False)
         # _w = Writer(self.ssd, ptsans26, verbose=False)
-        # _w = Writer(self.ssd, ptsans23, verbose=False)
+        _w_day = Writer(self.ssd, ptsans23, verbose=False)
         _w = Writer(self.ssd, ptsans20, verbose=False)
         self.day = []
         self.desc = []
@@ -43,7 +43,7 @@ class Display():
             col = 5
             width = 390
             height = 1
-            t = Textbox(_w, row, col, width, height, clip=True, bdcolor=True )
+            t = Textbox(_w_day, row, col, width, height, clip=True, bdcolor=True )
             print(f"Day Row {i} at {row},{col} size {width}x{height}, t.height {t.height}")
             self.day.append(t)
             row = row_i + 21
