@@ -163,15 +163,16 @@ def get_wx(place):
     return wx_data
 
 def get_wx_list(place):
-    ret = []
+    day = []
+    desc = []
     print(f"Getting wx for {place}")
     with open(place, 'r') as f:
         p = json.load(f)['properties']['periods']
     for j in range(0,12,2):
         print("{0}: {1} deg, wind {2}\n   {3} ".format(p[j]['name'], p[j]['temperature'], p[j]['windSpeed'], p[j]['shortForecast']))
-        ret.append("{0}: {1} deg, wind {2}\n\t\t{3} ".format(p[j]['name'], p[j]['temperature'], p[j]['windSpeed'], p[j]['shortForecast']))
-    return ret
-
+        day.append("{0}: {1} deg, wind {2} ".format(p[j]['name'], p[j]['temperature'], p[j]['windSpeed']))
+        desc.append(f"{p[j]['shortForecast']}")
+    return day, desc
 
 def connect_wifi(ssid, password)->bool:
     ret = False
@@ -272,11 +273,10 @@ class Display_App():
             r = self.r.value()
             title = self.places[r]
             # weather = get_wx(title)
-            wx_list = get_wx_list(title)
+            day, desc = get_wx_list(title)
         # ret[u[0]] = [ all_data['properties']['periods'][0]['detailedForecast'] ]
             print( f"Updating display for {title}")
-            print(f"{wx_list[0]}\n{wx_list[1]}\n{wx_list[2]}\n{wx_list[3]}\n{wx_list[4]}")
-            await self.d.update_display(f"{title}", f"{wx_list[0]}\n{wx_list[1]}\n{wx_list[2]}\n{wx_list[3]}\n{wx_list[4]}\n{wx_list[5]}", fast=True)
+            await self.d.update_display(f"{title}", day, desc, fast=True)
     async def r_action(self):
         while True:
             await self.e_r.wait()
