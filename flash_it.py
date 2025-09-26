@@ -8,6 +8,7 @@ DIRS = "drivers extras gui extras/widgets extras/demos gui/core gui/widgets gui/
 CORE = "__init__.py colors.py fplot.py nanogui.py writer.py"
 WIDG = "__init__.py dial.py label.py led.py meter.py scale.py textbox.py"
 FONT = "arial10.py arial35.py arial_50.py courier20.py font10.py font6.py freesans20.py"
+# /Users/kangasp/git_things/hi_map/sw/lib/ezFBfont_PTSans_20_ascii_28.py
 EXTW = "calendar.py clock.py eclock.py grid.py"
 EXTD = "calendar.py clock_test.py eclock_async.py eclock_test.py"
 ROT = "rotary.py rotary_irq_esp.py"

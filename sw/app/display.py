@@ -4,6 +4,10 @@ from gui.core.colors import *
 from gui.widgets.label import Label, ALIGN_CENTER
 from gui.widgets.textbox import Textbox
 import gui.fonts.freesans20 as freesans20
+import gui.fonts.courier20 as courier20
+import gui.fonts.arial10 as arial10
+import gui.fonts.ezFBfont_PTSans_20_ascii_28 as ptsans28
+import gui.fonts.ezFBfont_PTSans_18_ascii_26 as ptsans26
 import gui.fonts.arial_50 as arial50 # This needs to be remade with more chars
 import gui.fonts.arial35 as arial35
 import asyncio
@@ -20,24 +24,26 @@ class Display():
         # self.title = Textbox(self.writer_title, 2, 20, 360, 1, clip=False )
         self.title = Label(self.writer_title, 2, 20, text=400-40, align=ALIGN_CENTER)
         Writer.set_textpos(self.ssd, 0, 0)
-        _w = Writer(self.ssd, freesans20, verbose=False)
+        # _w = Writer(self.ssd, freesans20, verbose=False)
+        # _w = Writer(self.ssd, courier20, verbose=False)
+        # _w = Writer(self.ssd, arial10, verbose=False)
+        _w = Writer(self.ssd, ptsans26, verbose=False)
         self.day = []
         self.desc = []
         self.rows = 5
         _LH = 20
-        _row_spacing = 26
+        _row_spacing = 31
         for i in range(self.rows):
-                          # writer, row, col, width, height, clip=True, bdcolor=False
-            row = 2 + 35 + 5 + i*(_LH + _row_spacing)
+            row_i = 2 + 35 + 5 + i*(_LH + _row_spacing)
+            row = row_i
             col = 5
             width = 390
             height = 1
             t = Textbox(_w, row, col, width, height, clip=True, bdcolor=True )
             print(f"Day Row {i} at {row},{col} size {width}x{height}, t.height {t.height}")
             self.day.append(t)
-        for i in range(self.rows):
-            row = 2 + 35 + 25 + 5 + i*(_LH + _row_spacing)
-            col = 60
+            row = row_i + 23
+            col = 70
             width = 400 - col - 5
             height = 1
             t = Textbox(_w, row, col, width, height, clip=True, bdcolor=True )
