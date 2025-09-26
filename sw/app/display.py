@@ -8,6 +8,7 @@ import gui.fonts.courier20 as courier20
 import gui.fonts.arial10 as arial10
 import gui.fonts.ezFBfont_PTSans_20_ascii_28 as ptsans28
 import gui.fonts.ezFBfont_PTSans_18_ascii_26 as ptsans26
+import gui.fonts.ezFBfont_PTSans_16_ascii_23 as ptsans23
 import gui.fonts.arial_50 as arial50 # This needs to be remade with more chars
 import gui.fonts.arial35 as arial35
 import asyncio
@@ -27,12 +28,13 @@ class Display():
         # _w = Writer(self.ssd, freesans20, verbose=False)
         # _w = Writer(self.ssd, courier20, verbose=False)
         # _w = Writer(self.ssd, arial10, verbose=False)
-        _w = Writer(self.ssd, ptsans26, verbose=False)
+        # _w = Writer(self.ssd, ptsans26, verbose=False)
+        _w = Writer(self.ssd, ptsans23, verbose=False)
         self.day = []
         self.desc = []
         self.rows = 5
         _LH = 20
-        _row_spacing = 31
+        _row_spacing = 33
         for i in range(self.rows):
             row_i = 2 + 35 + 5 + i*(_LH + _row_spacing)
             row = row_i
@@ -42,7 +44,7 @@ class Display():
             t = Textbox(_w, row, col, width, height, clip=True, bdcolor=True )
             print(f"Day Row {i} at {row},{col} size {width}x{height}, t.height {t.height}")
             self.day.append(t)
-            row = row_i + 23
+            row = row_i + 21
             col = 70
             width = 400 - col - 5
             height = 1
