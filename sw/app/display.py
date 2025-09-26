@@ -9,6 +9,7 @@ import gui.fonts.arial10 as arial10
 import gui.fonts.ezFBfont_PTSans_20_ascii_28 as ptsans28
 import gui.fonts.ezFBfont_PTSans_18_ascii_26 as ptsans26
 import gui.fonts.ezFBfont_PTSans_16_ascii_23 as ptsans23
+import gui.fonts.ezFBfont_PTSans_14_ascii_20 as ptsans20
 import gui.fonts.arial_50 as arial50 # This needs to be remade with more chars
 import gui.fonts.arial35 as arial35
 import asyncio
@@ -29,7 +30,8 @@ class Display():
         # _w = Writer(self.ssd, courier20, verbose=False)
         # _w = Writer(self.ssd, arial10, verbose=False)
         # _w = Writer(self.ssd, ptsans26, verbose=False)
-        _w = Writer(self.ssd, ptsans23, verbose=False)
+        # _w = Writer(self.ssd, ptsans23, verbose=False)
+        _w = Writer(self.ssd, ptsans20, verbose=False)
         self.day = []
         self.desc = []
         self.rows = 5
